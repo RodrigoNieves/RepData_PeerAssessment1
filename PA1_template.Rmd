@@ -53,6 +53,57 @@ averages[which.max(averages$steps),]
 
 ## Imputing missing values
 
+1. Calculating and reporting the total number of missing values in the dataset 
+
+```{r}
+missing <- is.na(rawData$steps)
+nMissing <- summary(missing)[3]
+```
+
+There are `r nMissing` missing values.
+
+2. Devising a strategy for filling in all of the missing values in the dataset. 
+
+All of the missing values are filled in with mean value for that 5-minute interval.
+
+3. Creating a new dataset that is equal to the original dataset but with the missing data filled in.
+
+Here is the code to fill it.
+
+```{r}
+fill.value <- function(steps, interval) {
+    filled <- NA
+    if (!is.na(steps)) 
+        filled <- c(steps) else filled <- (averages[averages$interval == interval, "steps"])
+    return(filled)
+}
+filled.data <- rawData
+filled.data$steps <- mapply(fill.value, filled.data$steps, filled.data$interval)
+```
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+4.1. Calculating total number of steps per day
+
+```{r}
+steps = aggregate(filled.data$steps ~ rawData$formatDate, FUN = sum)
+```
+
+4.2. Histogram of the number of steps per day
+
+```{r}
+total.steps <- tapply(filled.data$steps, filled.data$date, FUN = sum)
+qplot(total.steps, xlab = "total number of steps taken each day")
+```
+
+4.3. Mean and median of the total number of steps per day
+
+```{r}
+meanSteps = mean(total.steps)
+medianSteps = median(total.steps)
+```
+The mean of steps per day is: `r meanSteps`.  
+The median of steps per day is: `r medianSteps`.  
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
